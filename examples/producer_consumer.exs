@@ -5,6 +5,7 @@
 # This is a base example where a producer A emits items,
 # which are amplified by a producer consumer B and printed
 # by consumer C.
+
 defmodule A do
   use GenStage
 
@@ -30,10 +31,11 @@ defmodule B do
   def handle_events(events, _from, number) do
     # If we receive [0, 1, 2], this will transform
     # it into [0, 1, 2, 1, 2, 3, 2, 3, 4].
-    events =
-      for event <- events,
-          entry <- event..event+number,
-          do: entry
+    # events =
+    #   for event <- events,
+    #       entry <- event..event+number,
+    #       do: entry
+    events = Enum.map(events, & &1 * number)
     {:noreply, events, number}
   end
 end
@@ -58,9 +60,11 @@ defmodule C do
 end
 
 {:ok, a} = GenStage.start_link(A, 0)   # starting from zero
-{:ok, b} = GenStage.start_link(B, 2)   # expand by 2
+{:ok, b} = GenStage.start_link(B, 1)   # expand by 2
 {:ok, c} = GenStage.start_link(C, :ok) # state does not matter
 
-GenStage.sync_subscribe(b, to: a)
 GenStage.sync_subscribe(c, to: b)
+GenStage.sync_subscribe(b, to: a, max_demand: 1000)
 Process.sleep(:infinity)
+
+

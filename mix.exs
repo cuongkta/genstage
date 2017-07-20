@@ -16,12 +16,15 @@ defmodule GenStage.Mixfile do
   end
 
   def application do
-    [applications: [:logger]]
+    [applications: [:logger, :httpoison]]
   end
 
   defp deps do
     [{:ex_doc, "~> 0.12", only: :docs},
-     {:inch_ex, ">= 0.4.0", only: :docs}]
+     {:inch_ex, ">= 0.4.0", only: :docs},
+     {:httpoison, "~> 0.11.1"},
+     {:poison, "~> 2.2"}
+   ]
   end
 
   defp package do
